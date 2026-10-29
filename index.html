@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cabina">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B1020">
+<title>Cabina</title>
+<link rel="apple-touch-icon" id="touchIcon" href="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=DM+Mono:wght@400;500&family=Hanken+Grotesk:wght@400;500;700&display=swap">
+<style>
+/* Layout: una sola columna tipo hoja de estudio. Secciones separadas por filetes,
+   chips como etiquetas de disco, barra de "Generar" fija abajo. */
+:root {
+  --bg: #0B1020;
+  --surface: #131A2E;
+  --raised: #1B2542;
+  --line: #2A3558;
+  --fg: #ECEFF7;
+  --dim: #9AA6C7;
+  --accent: #F2B418;
+  --on-accent: #1A1405;
+  --accent-text: #F2B418;
+  --crit: #FF8A8A;
+  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #EDEFF6;
+    --surface: #FFFFFF;
+    --raised: #E3E7F2;
+    --line: #C7CEE2;
+    --fg: #0F1630;
+    --dim: #4A5679;
+    --accent-text: #7A5200;
+    --crit: #B3261E;
+    color-scheme: light;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.5 var(--font-body);
+  padding-block: max(16px, env(safe-area-inset-top, 0px)) 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 560px; margin: 0 auto; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 8px 4px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand h1 { margin: 0; font: 800 44px/1 var(--font-display); letter-spacing: .04em; }
+.lede { margin: 4px 0 0; color: var(--dim); max-width: 46ch; }
+
+section { padding-block: 20px; border-top: 1px solid var(--line); margin-top: 20px; }
+.top + .lede + section { margin-top: 16px; }
+h2 { margin: 0 0 4px; font: 800 24px/1.1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; text-wrap: balance; }
+.sub { margin: 0 0 12px; color: var(--dim); font-size: 14px; }
+
+textarea, select {
+  width: 100%; min-height: 48px; padding: 12px 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+}
+textarea { min-height: 96px; resize: vertical; }
+select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--dim) 50%), linear-gradient(135deg, var(--dim) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-height: 40px; padding: 6px 12px; border-radius: 6px;
+  background: var(--surface); border: 1px solid var(--line);
+  font-size: 14px; font-weight: 500;
+}
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
+.chip.x::after { content: " ×"; opacity: .7; }
+.group-label { margin: 16px 0 8px; font: 500 12px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.group-label:first-child { margin-top: 0; }
+.tip { margin: 12px 0 0; padding-left: 12px; border-left: 3px solid var(--accent); color: var(--fg); font-size: 14px; }
+.tip[hidden] { display: none; }
+
+.btn {
+  min-height: 44px; padding: 8px 16px; border-radius: 8px;
+  background: var(--raised); border: 1px solid var(--line); font-weight: 700;
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.ghost { background: transparent; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row.between { justify-content: space-between; }
+
+.field { display: grid; gap: 6px; margin-bottom: 18px; }
+.field:last-child { margin-bottom: 0; }
+.field-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.field label, .field .lbl { font-weight: 700; }
+.readout { font: 500 20px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent-text); }
+input[type="range"] { width: 100%; height: 36px; accent-color: var(--accent); margin: 0; }
+.hint { margin: 0; color: var(--dim); font-size: 13px; }
+.hint button { margin-left: 6px; padding: 2px 10px; min-height: 28px; border-radius: 6px; border: 1px solid var(--accent-text); background: transparent; color: var(--accent-text); font-weight: 700; }
+.check { display: flex; gap: 12px; align-items: flex-start; }
+.check input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.check span { min-width: 0; }
+
+pre.preview {
+  margin: 0 0 12px; padding: 12px 14px; max-height: 220px; overflow: auto;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  background: var(--surface); border: 1px dashed var(--line); border-radius: 8px;
+  font: 400 13px/1.55 var(--font-mono); color: var(--dim);
+}
+
+.disc {
+  --label: var(--accent);
+  flex: none; width: 76px; height: 76px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, var(--bg) 0 3px, var(--label) 4px 17px, #0a0a0f 18px 19px, transparent 20px),
+    repeating-radial-gradient(circle at 50% 50%, #15151c 0 2px, #0c0c11 2px 4px);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.disc.spin { animation: spin 2.4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .disc.spin { animation: none; } }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 14px; }
+.card-head { display: flex; gap: 14px; align-items: center; min-width: 0; }
+.card-head > div { min-width: 0; }
+.card h3 { margin: 0; font: 800 26px/1.05 var(--font-display); letter-spacing: .03em; text-transform: uppercase; overflow-wrap: anywhere; }
+.meta { margin: 4px 0 0; font: 400 13px/1.4 var(--font-mono); color: var(--dim); font-variant-numeric: tabular-nums; }
+audio { width: 100%; }
+.status { font-weight: 700; }
+.elapsed { font: 500 14px/1 var(--font-mono); color: var(--dim); font-variant-numeric: tabular-nums; }
+.bar-track { height: 6px; border-radius: 3px; background: var(--raised); overflow: hidden; }
+.bar-fill { height: 100%; width: 35%; background: var(--accent); border-radius: 3px; animation: slide 1.6s ease-in-out infinite; }
+@keyframes slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .bar-fill { animation: none; margin-left: 0; width: 100%; opacity: .6; } }
+.error { margin: 0; padding: 12px 14px; border: 1px solid var(--crit); border-radius: 8px; color: var(--crit); font-weight: 500; }
+
+.lib { display: grid; gap: 8px; }
+.lib-item { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.lib-item .t { font-weight: 700; overflow-wrap: anywhere; }
+.lib-item .meta { margin-top: 2px; }
+.lib-item .acts { display: flex; gap: 6px; }
+.lib-item .btn { min-height: 40px; padding: 6px 12px; }
+.empty { color: var(--dim); font-size: 14px; margin: 0; }
+
+.bar {
+  position: sticky; bottom: 0; z-index: 5;
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background: linear-gradient(to bottom, transparent, var(--bg) 28%);
+}
+.bar-inner { max-width: 560px; margin: 0 auto; display: grid; gap: 6px; }
+.go { width: 100%; min-height: 58px; border-radius: 10px; border: 0; background: var(--accent); color: var(--on-accent); font: 800 24px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; }
+.go:disabled { opacity: .55; cursor: progress; }
+.bar-note { margin: 0; text-align: center; font-size: 12px; color: var(--dim); }
+
+dialog { width: min(92vw, 480px); border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--fg); padding: 20px; }
+dialog::backdrop { background: rgba(5, 8, 18, .72); }
+dialog h2 { margin-bottom: 8px; }
+dialog ol { margin: 0 0 14px; padding-left: 20px; color: var(--dim); font-size: 14px; }
+dialog input { width: 100%; min-height: 48px; padding: 10px 14px; margin-bottom: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font-family: var(--font-mono); font-size: 14px; }
+dialog a { color: var(--accent-text); font-weight: 700; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="disc" style="width:44px;height:44px" aria-hidden="true"></div>
+      <h1>CABINA</h1>
+    </div>
+    <button class="btn ghost" id="keyBtn" type="button">Clave</button>
+  </header>
+  <p class="lede">Beats instrumentales para rapear, hechos con IA. Describe el sonido, elige el estilo y recibe un tema completo de 3 minutos o más.</p>
+
+  <section>
+    <h2>Tu idea</h2>
+    <p class="sub">Cuenta cómo quieres que suene. En inglés funciona mejor, pero puedes escribir en español.</p>
+    <textarea id="idea" rows="3" placeholder="Ej: beat oscuro para un tema de superación, piano triste y drums que peguen duro"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="surprise" type="button">Sorpréndeme</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Estilo</h2>
+    <p class="sub">Elige uno para recibir ideas y el tempo típico.</p>
+    <div class="chips" id="genres"></div>
+    <p class="tip" id="tip" hidden></p>
+  </section>
+
+  <section>
+    <h2>Cultura y referencias</h2>
+    <p class="sub">El sonido de cada ciudad. Opcional.</p>
+    <div class="chips" id="regions"></div>
+  </section>
+
+  <section>
+    <h2>Suma ideas</h2>
+    <div class="group-label" id="tagsLabel">Sonidos del estilo</div>
+    <div class="chips" id="tags"></div>
+    <div class="group-label">Ambiente</div>
+    <div class="chips" id="moods"></div>
+    <div id="tweaksBox" hidden>
+      <div class="group-label">Variaciones activas</div>
+      <div class="chips" id="tweaks"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Afina el beat</h2>
+    <div class="field">
+      <div class="field-head"><label for="bpm">Tempo</label><span class="readout" id="bpmOut">90 BPM</span></div>
+      <input id="bpm" type="range" min="60" max="200" step="1" value="90">
+      <p class="hint" id="bpmHint"></p>
+    </div>
+    <div class="field">
+      <label for="key">Tonalidad</label>
+      <select id="key"></select>
+    </div>
+    <div class="field">
+      <div class="field-head"><label for="dur">Duración</label><span class="readout" id="durOut">3:00</span></div>
+      <input id="dur" type="range" min="180" max="360" step="15" value="180">
+    </div>
+    <div class="field">
+      <label for="fmt">Formato de descarga</label>
+      <select id="fmt"></select>
+    </div>
+    <div class="field">
+      <label class="check" for="room"><input id="room" type="checkbox" checked><span><strong>Dejar espacio para mi voz</strong><br><span class="hint">Medios limpios y sin melodía que compita con tu flow. Sin voces en el beat.</span></span></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Lo que se enviará</h2>
+    <p class="sub">Este es el pedido completo para la IA.</p>
+    <pre class="preview" id="preview"></pre>
+    <button class="btn" id="copy" type="button">Copiar pedido</button>
+  </section>
+
+  <section id="stage" hidden aria-live="polite">
+    <div class="card">
+      <div class="card-head">
+        <div class="disc spin" aria-hidden="true"></div>
+        <div>
+          <h3>En la cabina</h3>
+          <p class="meta"><span class="status" id="statusText">Enviando…</span> <span class="elapsed" id="elapsed">0:00</span></p>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill"></div></div>
+      <div class="row"><button class="btn" id="cancel" type="button">Cancelar</button></div>
+    </div>
+  </section>
+
+  <section id="errorBox" hidden>
+    <p class="error" id="errorText" role="alert"></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="card">
+      <div class="card-head">
+        <div class="disc" id="resDisc" aria-hidden="true"></div>
+        <div>
+          <h3 id="resTitle">Beat</h3>
+          <p class="meta" id="resMeta"></p>
+        </div>
+      </div>
+      <audio id="player" controls preload="metadata" playsinline></audio>
+      <div class="row">
+        <button class="btn primary" id="save" type="button">Guardar archivo</button>
+        <button class="btn" id="again" type="button">Otra toma</button>
+      </div>
+      <div>
+        <div class="group-label">Variaciones (generan un beat nuevo)</div>
+        <div class="chips" id="variations"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mis beats</h2>
+    <p class="sub">Se guardan en este iPhone para escucharlos sin conexión.</p>
+    <div class="lib" id="library"></div>
+  </section>
+
+  <div class="bar">
+    <div class="bar-inner">
+      <button class="go" id="go" type="button">Generar beat</button>
+      <p class="bar-note">Cada beat se cobra a tu cuenta de fal.ai.</p>
+    </div>
+  </div>
+</div>
+
+<dialog id="keyDlg">
+  <form method="dialog" id="keyForm">
+    <h2>Tu clave de fal.ai</h2>
+    <ol>
+      <li>Crea una cuenta en <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener">fal.ai</a> y carga saldo.</li>
+      <li>En Keys, crea una clave nueva.</li>
+      <li>Pégala aquí. Se guarda solo en este teléfono.</li>
+    </ol>
+    <input id="keyInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pega tu clave">
+    <div class="row between">
+      <button class="btn ghost" id="keyForget" type="button">Borrar clave</button>
+      <div class="row">
+        <button class="btn ghost" id="keyClose" type="button">Cerrar</button>
+        <button class="btn primary" id="keySave" type="submit">Guardar</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Datos ---------- */
+const ENDPOINT = 'https://queue.fal.run/fal-ai/stable-audio-3/medium/text-to-audio';
+const NEG = 'vocals, singing, rapping, humming, choir, spoken word, lyrics, muddy mix, clipping, background noise';
+const MAX_LIB = 12;
+
+const GENRES = [
+  { id: 'boombap', name: 'Boom Bap', bpm: 90, range: [82, 98],
+    base: 'classic 1990s boom bap hip hop instrumental with hard-hitting dusty drums, swung 16th-note groove, chopped soul and jazz sample loops, deep warm bass',
+    tip: 'Un loop de 4 u 8 compases que se repita y deje respirar la caja. Ideal para barras largas.',
+    tags: [['Rhodes jazzero','jazzy Rhodes electric piano chords'],['Loop de soul chopeado','chopped vintage soul sample loop'],['Vinilo y crackle','vinyl crackle and tape warmth'],['Scratches','DJ scratches and cuts in the hook sections'],['Contrabajo','upright bass line'],['Cuerdas de película','cinematic string stabs'],['Trompeta con sordina','muted trumpet melody'],['Caja seca','crisp snare with short room reverb']] },
+  { id: 'trap', name: 'Trap', bpm: 140, range: [130, 150],
+    base: 'modern trap instrumental with heavy 808 sub bass, snappy claps and snares in half-time, rolling hi-hats with triplet stutters, dark atmospheric pads',
+    tip: 'Rapea en medio tiempo (70 BPM se siente) y usa los silencios antes del coro para meter ad-libs.',
+    tags: [['808 con glide','long gliding 808 bass slides'],['Hi-hat rolls','fast hi-hat rolls and stutters'],['Campanas','icy bell melody'],['Pad oscuro','dark evolving synth pad'],['Flauta','haunting flute melody'],['Arpegio','minor arpeggiated synth'],['Risers y caídas','risers, drum fills and drops before the hook'],['Kick pesado','tight punchy kick layered with sub']] },
+  { id: 'drill', name: 'Drill', bpm: 142, range: [138, 146],
+    base: 'drill instrumental with sliding 808 bass, sparse syncopated snare pattern, bouncy skittering hi-hats, ominous minor piano and strings',
+    tip: 'Patrones secos y mucho espacio. Funciona con flows cortados y rápidos.',
+    tags: [['Piano siniestro','ominous minor piano melody'],['Cuerdas tensas','tense staccato strings'],['808 deslizante','sliding 808 bass glides'],['Hats saltarines','skittering triplet hi-hats'],['Percusión metálica','metallic percussion with echo']] },
+  { id: 'gfunk', name: 'G-Funk', bpm: 94, range: [88, 100],
+    base: 'west coast G-funk instrumental, laid-back swung drums, deep funky bass, smooth portamento synth lead, warm analog keys',
+    tip: 'Groove relajado, perfecto para flows melódicos y cantados.',
+    tags: [['Sinte silbador','high whining portamento synth lead'],['Bajo funky','slap funk bass line'],['Guitarra wah','wah funk guitar licks'],['Teclas cálidas','warm Rhodes and Moog-style keys'],['Palmas y cowbell','handclaps and cowbell'],['Vibra de lowrider','sunny low-rider cruising vibe']] },
+  { id: 'cloud', name: 'Cloud', bpm: 135, range: [125, 145],
+    base: 'cloud rap instrumental, dreamy washed-out synth pads, soft sub bass, slow spacious drums, lots of reverb, hazy atmosphere',
+    tip: 'Mucho aire entre sonidos. Pide voces suaves, dobles y con eco.',
+    tags: [['Pads flotantes','wide floating pads'],['Campanitas','glassy bell textures'],['Reverb largo','long reverb tails'],['Guitarra con delay','ambient guitar with delay'],['Sub suave','soft round sub bass']] },
+  { id: 'phonk', name: 'Phonk', bpm: 135, range: [125, 150],
+    base: 'phonk instrumental with distorted cowbell melody, gritty Memphis-style drums, heavy overdriven 808, dark chopped samples, aggressive drift vibe',
+    tip: 'Agresivo y repetitivo. Rapea encima con energía, frases cortas y golpeadas.',
+    tags: [['Cowbell distorsionado','distorted cowbell lead'],['808 saturado','overdriven 808 bass'],['Chops oscuros','dark chopped sample stabs'],['Kick de drift','hard distorted kick drum'],['Sirenas','siren-like synth stabs']] },
+  { id: 'lofi', name: 'Lo-fi', bpm: 78, range: [68, 88],
+    base: 'lo-fi hip hop instrumental, dusty mellow drums with lazy swing, warm detuned keys, vinyl noise, relaxed late-night mood',
+    tip: 'Ideal para letras introspectivas. Mantén el tempo bajo para que quepan más palabras.',
+    tags: [['Piano desafinado','slightly detuned piano'],['Lluvia','soft rain ambience'],['Guitarra limpia','clean jazz guitar'],['Sidechain suave','gentle pumping sidechain'],['Cinta gastada','tape wobble and saturation']] },
+  { id: 'rnb', name: 'R&B', bpm: 68, range: [58, 80],
+    base: 'smooth contemporary R&B instrumental, warm Rhodes chords, lush extended jazz harmony, soft punchy drums, subtle 808 bass, finger snaps',
+    tip: 'Armonías largas y espacio para melodías cantadas. Prueba con el coro a medio arreglo.',
+    tags: [['Acordes con novena','lush extended chords'],['Chasquidos','finger snaps'],['Bajo cálido','warm round bass'],['Guitarra suave','clean guitar arpeggios'],['Pads sedosos','silky pads'],['Arreglo íntimo','intimate minimal arrangement']] },
+  { id: 'neosoul', name: 'Neo Soul', bpm: 84, range: [74, 94],
+    base: 'neo soul hip hop instrumental, live-feel drums played behind the beat, warm Rhodes, soulful walking bass, hazy organic texture',
+    tip: 'Batería con swing humano. Los flows relajados y con swing encajan muy bien.',
+    tags: [['Batería humana','human drummer feel with ghost notes'],['Órgano','warm Hammond organ'],['Bajo caminante','melodic walking bass'],['Armonías de teclado','layered keyboard harmonies'],['Cuerdas suaves','soft string section']] },
+  { id: 'jazzrap', name: 'Jazz Rap', bpm: 92, range: [84, 100],
+    base: 'jazz rap instrumental, upright bass, drums with hip hop swing, smoky piano chords, saxophone and muted trumpet',
+    tip: 'Piano y viento llevan la melodía. Escribe con rimas internas y mucho detalle.',
+    tags: [['Saxofón','smoky saxophone melody'],['Piano de club','smoky club piano'],['Escobillas','brushed snare feel'],['Vibráfono','vibraphone chords'],['Contrabajo','upright bass line']] },
+  { id: 'south', name: 'Dirty South', bpm: 76, range: [68, 84],
+    base: 'Southern hip hop instrumental, bouncing 808 kick, heavy booming sub, crunk-style claps, brass and synth stabs',
+    tip: 'Rebote pesado y coros fáciles de cantar con el público.',
+    tags: [['Metales','punchy brass stabs'],['Sinte de club','crunk synth stabs'],['Palmas pesadas','big stomp-clap'],['Órgano de iglesia','gospel organ'],['Sub que retumba','booming sub bass']] },
+  { id: 'screwed', name: 'Screwed', bpm: 66, range: [58, 74],
+    base: 'slowed down Houston chopped and screwed style instrumental, syrupy slow tempo, woozy detuned samples, deep sub bass, heavy swing',
+    tip: 'Muy lento. Alarga las sílabas y juega con pausas largas.',
+    tags: [['Sample lento','slowed woozy sample'],['Tono bajo','pitched-down warm tone'],['Hats lentos','slow lazy hi-hats'],['Eco de cinta','tape echo'],['Sinte almibarado','syrupy detuned synth']] },
+  { id: 'oldschool', name: 'Old School', bpm: 108, range: [98, 118],
+    base: '1980s old school hip hop and electro funk instrumental, Roland TR-808 drum machine, handclaps, funky synth bass, scratchy turntable',
+    tip: 'Ritmo directo y bailable. Funciona con rimas simples y mucha actitud.',
+    tags: [['TR-808 clásica','classic TR-808 drum machine pattern'],['Bajo de sinte','funky synth bass'],['Scratch','turntable scratches'],['Palmadas','handclaps'],['Breakbeat','classic breakbeat drum break']] },
+  { id: 'latin', name: 'Trap Latino', bpm: 95, range: [88, 102],
+    base: 'Latin trap and reggaeton dembow instrumental, dembow drum pattern, deep 808 bass, plucked guitar or synth melody, warm Latin percussion',
+    tip: 'Dembow marcado, ideal para flows en español con coros pegajosos.',
+    tags: [['Dembow','classic dembow rhythm'],['Guitarra de nylon','nylon string guitar melody'],['Percusión latina','Latin percussion'],['Pluck de sinte','bright synth pluck'],['808 profundo','deep 808 bass']] },
+  { id: 'regional', name: 'Regional x Trap', bpm: 100, range: [90, 108],
+    base: 'Mexican regional and trap fusion instrumental, nylon-string requinto guitar melody, tuba-like bass, trap hi-hats and 808s, melancholic and gritty',
+    tip: 'Guitarra al frente y base de trap. Funciona para historias y letras narrativas.',
+    tags: [['Requinto','requinto guitar melody'],['Acordeón','accordion'],['Tuba','tuba bass notes'],['Trompetas','mariachi-style trumpets'],['Hi-hats de trap','trap hi-hats']] }
+];
+
+const REGIONS = [
+  ['nyc','Nueva York 90s','inspired by the 1990s New York street hip hop sound'],
+  ['atl','Atlanta','inspired by the Atlanta trap and Southern club sound'],
+  ['hou','Houston','inspired by the slow and heavy Houston sound'],
+  ['mem','Memphis','inspired by gritty Memphis underground hip hop'],
+  ['det','Detroit','inspired by Detroit soulful, off-kilter drum programming'],
+  ['chi','Chicago','inspired by the Chicago drill and soul-sample sound'],
+  ['la','Los Ángeles','inspired by the West Coast Los Angeles sound'],
+  ['bay','Bay Area','inspired by Bay Area hyphy bounce'],
+  ['uk','Reino Unido','inspired by UK drill and grime'],
+  ['mx','México / Latino','inspired by the Mexican and Latin urban sound']
+];
+
+const MOODS = [
+  ['oscuro','dark and menacing mood'],['melancólico','melancholic and emotional'],['agresivo','aggressive and hard-hitting'],
+  ['etéreo','dreamy and floating'],['nocturno','late-night moody'],['épico','triumphant and cinematic'],
+  ['relajado','laid-back and smooth'],['sucio','gritty and raw'],['romántico','romantic and sensual'],['festivo','party energy, bouncy']
+];
+
+const VARIATIONS = [
+  { id: 'dark',   label: 'Más oscuro',      phrase: 'darker, more menacing mood' },
+  { id: 'slow',   label: 'Más lento',       bpm: -8 },
+  { id: 'fast',   label: 'Más rápido',      bpm: 8 },
+  { id: 'gritty', label: 'Más sucio',       phrase: 'grittier, dirtier drums with more saturation' },
+  { id: 'strings',label: 'Con cuerdas',     phrase: 'add cinematic strings' },
+  { id: 'piano',  label: 'Con piano',       phrase: 'add an emotional piano melody' },
+  { id: 'hard',   label: 'Drums más duros', phrase: 'harder, punchier drums and kick' },
+  { id: 'sparse', label: 'Más espacio',     phrase: 'even sparser arrangement with minimal melody' }
+];
+
+const FORMATS = {
+  wav:  { label: 'WAV · sin pérdida (ideal para mezclar)', ext: 'wav',  mime: 'audio/wav' },
+  flac: { label: 'FLAC · sin pérdida, más ligero',          ext: 'flac', mime: 'audio/flac' },
+  mp3:  { label: 'MP3 · 320 kbps',                          ext: 'mp3',  mime: 'audio/mpeg', bitrate: '320k' },
+  m4a:  { label: 'M4A (AAC) · 256 kbps',                    ext: 'm4a',  mime: 'audio/mp4',  bitrate: '256k' }
+};
+
+const KEYS = ['Auto'].concat(
+  ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'].map(k => k + ' minor'),
+  ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'].map(k => k + ' major')
+);
+
+/* ---------- Utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const mmss = s => Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0');
+const mb = n => (n / 1048576).toFixed(1) + ' MB';
+const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} }
+};
+class AppError extends Error {}
+const sleep = (ms, signal) => new Promise((res, rej) => {
+  const t = setTimeout(res, ms);
+  signal && signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('Cancelado', 'AbortError')); }, { once: true });
+});
+
+/* ---------- Estado ---------- */
+const S = {
+  text: '', genre: null, region: null, tags: new Set(), moods: new Set(), tweaks: new Set(),
+  bpm: 90, key: 'Auto', dur: store.get('dur', 180), fmt: store.get('fmt', 'wav'),
+  room: store.get('room', true)
+};
+if (!FORMATS[S.fmt]) S.fmt = 'wav';
+S.dur = clamp(Number(S.dur) || 180, 180, 360);
+let busy = false, aborter = null, cancelUrl = null, current = null, currentObjUrl = null, timer = null;
+
+const genreOf = () => GENRES.find(g => g.id === S.genre) || null;
+
+/* ---------- Pedido a la IA ---------- */
+function composePrompt() {
+  const g = genreOf(), parts = [];
+  if (S.text.trim()) parts.push(S.text.trim());
+  if (g) parts.push(g.base);
+  const r = REGIONS.find(x => x[0] === S.region);
+  if (r) parts.push(r[2]);
+  if (g) g.tags.forEach(([, p], i) => { if (S.tags.has(i)) parts.push(p); });
+  MOODS.forEach(([id, p]) => { if (S.moods.has(id)) parts.push(p); });
+  VARIATIONS.forEach(v => { if (v.phrase && S.tweaks.has(v.id)) parts.push(v.phrase); });
+  parts.push(S.bpm + ' BPM');
+  if (S.key !== 'Auto') parts.push('in the key of ' + S.key);
+  if (S.room) parts.push("leaves room for a rapper's vocals: sparse mid-range and no lead melody competing with the voice");
+  parts.push('instrumental only, full-length beat with intro, steady verse loops, hook, bridge and outro, evolving arrangement, clean punchy mix, professionally mastered, studio quality');
+  return parts.join('. ');
+}
+function beatTitle() {
+  const g = genreOf();
+  return (g ? g.name : 'Beat') + ' · ' + S.bpm + ' BPM' + (S.key !== 'Auto' ? ' · ' + S.key : '');
+}
+
+/* ---------- Render ---------- */
+const chip = (kind, id, label, extra = '') =>
+  `<button type="button" class="chip ${extra}" data-kind="${kind}" data-id="${esc(id)}" aria-pressed="false">${esc(label)}</button>`;
+
+function buildStatic() {
+  $('#genres').innerHTML = GENRES.map(g => chip('genre', g.id, g.name)).join('');
+  $('#regions').innerHTML = REGIONS.map(r => chip('region', r[0], r[1])).join('');
+  $('#moods').innerHTML = MOODS.map(m => chip('mood', m[0], m[0][0].toUpperCase() + m[0].slice(1))).join('');
+  $('#variations').innerHTML = VARIATIONS.map(v => `<button type="button" class="chip" data-kind="variation" data-id="${v.id}">${esc(v.label)}</button>`).join('');
+  $('#key').innerHTML = KEYS.map(k => `<option value="${k}">${k === 'Auto' ? 'Auto (que la IA elija)' : k}</option>`).join('');
+  $('#fmt').innerHTML = Object.entries(FORMATS).map(([k, f]) => `<option value="${k}">${esc(f.label)}</option>`).join('');
+}
+function renderTags() {
+  const g = genreOf();
+  $('#tagsLabel').textContent = g ? 'Sonidos de ' + g.name : 'Sonidos del estilo';
+  $('#tags').innerHTML = g
+    ? g.tags.map(([l], i) => chip('tag', String(i), l)).join('')
+    : '<p class="empty">Elige un estilo arriba para ver ideas de sonidos.</p>';
+}
+function renderTweaks() {
+  const on = VARIATIONS.filter(v => v.phrase && S.tweaks.has(v.id));
+  $('#tweaksBox').hidden = on.length === 0;
+  $('#tweaks').innerHTML = on.map(v => `<button type="button" class="chip x" data-kind="untweak" data-id="${v.id}" aria-pressed="true">${esc(v.label)}</button>`).join('');
+}
+function sync() {
+  document.querySelectorAll('[data-kind]').forEach(el => {
+    if (!el.hasAttribute('aria-pressed') || el.dataset.kind === 'untweak') return;
+    const { kind, id } = el.dataset;
+    let on = false;
+    if (kind === 'genre') on = S.genre === id;
+    else if (kind === 'region') on = S.region === id;
+    else if (kind === 'mood') on = S.moods.has(id);
+    else if (kind === 'tag') on = S.tags.has(Number(id));
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  const g = genreOf();
+  const tip = $('#tip');
+  tip.hidden = !g; tip.textContent = g ? g.tip : '';
+  $('#bpm').value = S.bpm; $('#bpmOut').textContent = S.bpm + ' BPM';
+  const hint = $('#bpmHint');
+  if (g && (S.bpm < g.range[0] || S.bpm > g.range[1])) {
+    hint.innerHTML = `${esc(g.name)} suele sonar entre ${g.range[0]} y ${g.range[1]} BPM. <button type="button" data-kind="bpmfix">Usar ${g.bpm}</button>`;
+  } else {
+    hint.textContent = g && g.bpm >= 120 ? 'Tip: a ' + Math.round(S.bpm / 2) + ' BPM se siente en medio tiempo, para rapear más pausado.' : '';
+  }
+  $('#key').value = S.key;
+  $('#dur').value = S.dur; $('#durOut').textContent = mmss(S.dur);
+  $('#fmt').value = S.fmt;
+  $('#room').checked = S.room;
+  $('#preview').textContent = composePrompt();
+  $('#go').textContent = busy ? 'Generando…' : 'Generar beat · ' + mmss(S.dur);
+  $('#go').disabled = busy;
+  renderTweaks();
+}
+
+/* ---------- Biblioteca (IndexedDB) ---------- */
+const mem = [];
+const idb = {
+  db: null,
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('cabina', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('beats', { keyPath: 'id' });
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  },
+  async run(mode, fn) {
+    if (!this.db) this.db = await this.open();
+    return new Promise((res, rej) => {
+      const t = this.db.transaction('beats', mode);
+      const req = fn(t.objectStore('beats'));
+      t.oncomplete = () => res(req ? req.result : undefined);
+      t.onerror = () => rej(t.error);
+    });
+  }
+};
+async function libAll() {
+  try { const all = await idb.run('readonly', s => s.getAll()); return all.sort((a, b) => b.ts - a.ts); }
+  catch { return mem.slice().sort((a, b) => b.ts - a.ts); }
+}
+async function libPut(item) {
+  try { await idb.run('readwrite', s => s.put(item)); }
+  catch { mem.push(item); }
+  const all = await libAll();
+  for (const old of all.slice(MAX_LIB)) await libDel(old.id, true);
+}
+async function libDel(id, silent) {
+  try { await idb.run('readwrite', s => s.delete(id)); }
+  catch { const i = mem.findIndex(x => x.id === id); if (i >= 0) mem.splice(i, 1); }
+  if (!silent) renderLibrary();
+}
+async function renderLibrary() {
+  const all = await libAll();
+  const box = $('#library');
+  if (!all.length) { box.innerHTML = '<p class="empty">Todavía no hay beats. Genera el primero.</p>'; return; }
+  box.innerHTML = all.map(it => `
+    <div class="lib-item">
+      <div style="min-width:0">
+        <div class="t">${esc(it.title)}</div>
+        <p class="meta">${mmss(it.dur)} · ${it.ext.toUpperCase()}${it.bytes ? ' · ' + mb(it.bytes) : ''} · ${new Date(it.ts).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</p>
+      </div>
+      <div class="acts">
+        <button class="btn" type="button" data-kind="libplay" data-id="${it.id}">Abrir</button>
+        <button class="btn ghost" type="button" data-kind="libdel" data-id="${it.id}" aria-label="Borrar ${esc(it.title)}">Borrar</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ---------- Resultado y descarga ---------- */
+function showItem(it, scroll = true) {
+  current = it;
+  if (currentObjUrl) { URL.revokeObjectURL(currentObjUrl); currentObjUrl = null; }
+  let src = it.url || '';
+  if (it.blob) { currentObjUrl = URL.createObjectURL(it.blob); src = currentObjUrl; }
+  const player = $('#player');
+  player.src = src;
+  $('#resTitle').textContent = it.title;
+  $('#resMeta').textContent = `${mmss(it.dur)} · ${it.ext.toUpperCase()}${it.bytes ? ' · ' + mb(it.bytes) : ''}`;
+  $('#resDisc').style.setProperty('--label', `hsl(${(it.seed || 0) % 360} 75% 55%)`);
+  $('#result').hidden = false;
+  if (scroll) $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function fileName(it) {
+  const slug = it.title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return `cabina-${slug}-${mmss(it.dur).replace(':', 'm')}s.${it.ext}`;
+}
+async function saveItem(it) {
+  if (!it) return;
+  if (it.blob) {
+    const file = new File([it.blob], fileName(it), { type: it.mime });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: it.title }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(it.blob); a.download = fileName(it);
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  } else if (it.url) {
+    window.open(it.url, '_blank', 'noopener');
+  }
+}
+
+/* ---------- API de fal.ai ---------- */
+async function api(url, opts, key) {
+  let r;
+  try {
+    r = await fetch(url, { ...opts, headers: { 'Authorization': 'Key ' + key, 'Content-Type': 'application/json' }, signal: aborter.signal });
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw e;
+    throw new AppError('No pude conectar con fal.ai. Revisa tu internet e inténtalo otra vez.');
+  }
+  if (!r.ok) {
+    let detail = '';
+    try { const j = await r.json(); detail = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail || j); } catch {}
+    if (r.status === 401 || r.status === 403) throw new AppError('fal.ai no aceptó la clave o la cuenta no tiene saldo. Revisa la clave y tu saldo en fal.ai.');
+    if (r.status === 429) throw new AppError('Demasiados pedidos seguidos. Espera un minuto e inténtalo otra vez.');
+    throw new AppError(`fal.ai respondió ${r.status}. ${detail}`.trim());
+  }
+  return r.json();
+}
+function setStage(on) {
+  $('#stage').hidden = !on;
+  clearInterval(timer);
+  if (on) {
+    const t0 = Date.now();
+    $('#elapsed').textContent = '0:00';
+    timer = setInterval(() => { $('#elapsed').textContent = mmss((Date.now() - t0) / 1000); }, 1000);
+    $('#stage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+function showError(msg) {
+  $('#errorBox').hidden = !msg;
+  $('#errorText').textContent = msg || '';
+  if (msg) $('#errorBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function generate() {
+  if (busy) return;
+  const key = store.get('fal_key', '');
+  if (!key) { openKey(); return; }
+  busy = true; aborter = new AbortController(); cancelUrl = null;
+  showError(''); setStage(true); sync();
+  const fmt = FORMATS[S.fmt];
+  const seed = Math.floor(Math.random() * 2147483647);
+  const body = { prompt: composePrompt(), negative_prompt: NEG, duration: S.dur, output_format: S.fmt, seed };
+  if (fmt.bitrate) body.bitrate = fmt.bitrate;
+  const started = Date.now();
+  try {
+    $('#statusText').textContent = 'Enviando…';
+    const sub = await api(ENDPOINT, { method: 'POST', body: JSON.stringify(body) }, key);
+    cancelUrl = sub.cancel_url || null;
+    for (;;) {
+      await sleep(2500, aborter.signal);
+      if (Date.now() - started > 10 * 60 * 1000) throw new AppError('Tardó demasiado. Inténtalo de nuevo con menos duración.');
+      const st = await api(sub.status_url, { method: 'GET' }, key);
+      if (st.status === 'COMPLETED') break;
+      $('#statusText').textContent = st.status === 'IN_QUEUE'
+        ? 'En fila' + (typeof st.queue_position === 'number' ? ' (' + (st.queue_position + 1) + ')' : '') + '…'
+        : 'Produciendo…';
+    }
+    $('#statusText').textContent = 'Descargando…';
+    const out = await api(sub.response_url, { method: 'GET' }, key);
+    const audioUrl = out && out.audio && out.audio.url;
+    if (!audioUrl) throw new AppError('La IA terminó pero no devolvió audio. Prueba de nuevo.');
+    let blob = null;
+    try {
+      const ar = await fetch(audioUrl, { signal: aborter.signal });
+      if (ar.ok) blob = await ar.blob();
+    } catch (e) { if (e && e.name === 'AbortError') throw e; }
+    if (blob && (!blob.type || blob.type === 'application/octet-stream')) blob = new Blob([blob], { type: fmt.mime });
+    const it = {
+      id: String(Date.now()), ts: Date.now(), title: beatTitle(), prompt: body.prompt, seed,
+      dur: S.dur, fmt: S.fmt, ext: fmt.ext, mime: (blob && blob.type) || fmt.mime,
+      url: audioUrl, blob, bytes: blob ? blob.size : 0
+    };
+    await libPut(it);
+    showItem(it);
+    renderLibrary();
+  } catch (e) {
+    if (e && e.name === 'AbortError') showError('Generación cancelada.');
+    else showError(e instanceof AppError ? e.message : 'Algo salió mal. Inténtalo de nuevo.');
+  } finally {
+    busy = false; setStage(false); sync();
+  }
+}
+
+/* ---------- Clave ---------- */
+const dlg = $('#keyDlg');
+function openKey() { $('#keyInput').value = ''; $('#keyInput').placeholder = store.get('fal_key', '') ? 'Ya hay una clave guardada' : 'Pega tu clave'; dlg.showModal(); }
+
+/* ---------- Eventos ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-kind]');
+  if (!el) return;
+  const { kind, id } = el.dataset;
+  if (kind === 'genre') {
+    if (S.genre === id) { S.genre = null; S.tags.clear(); }
+    else { S.genre = id; S.tags.clear(); S.bpm = genreOf().bpm; }
+    renderTags();
+  } else if (kind === 'region') S.region = S.region === id ? null : id;
+  else if (kind === 'mood') S.moods.has(id) ? S.moods.delete(id) : S.moods.add(id);
+  else if (kind === 'tag') { const n = Number(id); S.tags.has(n) ? S.tags.delete(n) : S.tags.add(n); }
+  else if (kind === 'untweak') S.tweaks.delete(id);
+  else if (kind === 'bpmfix') S.bpm = genreOf().bpm;
+  else if (kind === 'variation') {
+    const v = VARIATIONS.find(x => x.id === id);
+    if (v.bpm) S.bpm = clamp(S.bpm + v.bpm, 60, 200); else S.tweaks.add(v.id);
+    sync(); generate(); return;
+  }
+  else if (kind === 'libplay') { libAll().then(all => { const it = all.find(x => x.id === id); if (it) showItem(it); }); return; }
+  else if (kind === 'libdel') { libDel(id); return; }
+  sync();
+});
+
+$('#idea').addEventListener('input', e => { S.text = e.target.value; sync(); });
+$('#bpm').addEventListener('input', e => { S.bpm = Number(e.target.value); sync(); });
+$('#key').addEventListener('change', e => { S.key = e.target.value; sync(); });
+$('#dur').addEventListener('input', e => { S.dur = Number(e.target.value); store.set('dur', S.dur); sync(); });
+$('#fmt').addEventListener('change', e => { S.fmt = e.target.value; store.set('fmt', S.fmt); sync(); });
+$('#room').addEventListener('change', e => { S.room = e.target.checked; store.set('room', S.room); sync(); });
+$('#go').addEventListener('click', generate);
+$('#again').addEventListener('click', generate);
+$('#save').addEventListener('click', () => saveItem(current));
+$('#cancel').addEventListener('click', () => {
+  const key = store.get('fal_key', '');
+  if (cancelUrl) fetch(cancelUrl, { method: 'PUT', headers: { Authorization: 'Key ' + key } }).catch(() => {});
+  if (aborter) aborter.abort();
+});
+$('#surprise').addEventListener('click', () => {
+  const g = rand(GENRES);
+  S.genre = g.id; S.bpm = clamp(g.bpm + Math.round((Math.random() - .5) * 8), 60, 200);
+  S.region = Math.random() < .6 ? rand(REGIONS)[0] : null;
+  S.tags.clear(); S.moods.clear(); S.tweaks.clear();
+  const idx = g.tags.map((_, i) => i).sort(() => Math.random() - .5).slice(0, 2);
+  idx.forEach(i => S.tags.add(i));
+  S.moods.add(rand(MOODS)[0]);
+  S.key = rand(KEYS.slice(1, 13));
+  renderTags(); sync();
+});
+$('#copy').addEventListener('click', async e => {
+  const btn = e.currentTarget;
+  try { await navigator.clipboard.writeText(composePrompt()); btn.textContent = 'Copiado'; }
+  catch { const r = document.createRange(); r.selectNodeContents($('#preview')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Texto seleccionado'; }
+  setTimeout(() => { btn.textContent = 'Copiar pedido'; }, 1800);
+});
+$('#keyBtn').addEventListener('click', openKey);
+$('#keyClose').addEventListener('click', () => dlg.close());
+$('#keyForget').addEventListener('click', () => { store.del('fal_key'); dlg.close(); });
+$('#keyForm').addEventListener('submit', () => { const v = $('#keyInput').value.trim(); if (v) store.set('fal_key', v); });
+$('#player').addEventListener('play', () => $('#resDisc').classList.add('spin'));
+$('#player').addEventListener('pause', () => $('#resDisc').classList.remove('spin'));
+$('#player').addEventListener('ended', () => $('#resDisc').classList.remove('spin'));
+
+/* ---------- Icono para la pantalla de inicio ---------- */
+try {
+  const c = document.createElement('canvas'); c.width = c.height = 180;
+  const g = c.getContext('2d');
+  g.fillStyle = '#0B1020'; g.fillRect(0, 0, 180, 180);
+  g.fillStyle = '#15151c'; g.beginPath(); g.arc(90, 90, 70, 0, 7); g.fill();
+  g.strokeStyle = '#2b2b36'; g.lineWidth = 2;
+  [56, 46, 36].forEach(r => { g.beginPath(); g.arc(90, 90, r, 0, 7); g.stroke(); });
+  g.fillStyle = '#F2B418'; g.beginPath(); g.arc(90, 90, 24, 0, 7); g.fill();
+  g.fillStyle = '#0B1020'; g.beginPath(); g.arc(90, 90, 5, 0, 7); g.fill();
+  $('#touchIcon').href = c.toDataURL('image/png');
+} catch {}
+
+/* ---------- Inicio ---------- */
+buildStatic(); renderTags(); sync(); renderLibrary();
+if (!store.get('fal_key', '')) setTimeout(() => { try { openKey(); } catch {} }, 600);
+})();
+</script>
+</body>
+</html>
