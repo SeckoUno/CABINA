@@ -35,10 +35,10 @@ button { cursor: pointer; }
 [hidden] { display: none !important; }
 
 /* Bandas */
-.band { --bg: var(--black); --fg: var(--bone); --dim: var(--ash); --sel-bg: var(--orange); --sel-fg: var(--black); --line: var(--bone);
+.band { --bg: var(--black); --fg: var(--bone); --dim: var(--ash); --sel-bg: var(--orange); --sel-fg: var(--black); --line: var(--bone); --rule: #2C2C2C;
   position: relative; background: var(--bg); color: var(--fg); overflow: hidden; }
-.band.bone { --bg: var(--bone); --fg: var(--black); --dim: #5E594F; --sel-bg: var(--orange); --sel-fg: var(--black); --line: var(--black); }
-.band.orange { --bg: var(--orange); --fg: var(--black); --dim: #4A1505; --sel-bg: var(--black); --sel-fg: var(--bone); --line: var(--black); }
+.band.bone { --bg: var(--bone); --fg: var(--black); --dim: #5E594F; --sel-bg: var(--orange); --sel-fg: var(--black); --line: var(--black); --rule: #CFC8BA; }
+.band.orange { --bg: var(--orange); --fg: var(--black); --dim: #4A1505; --sel-bg: var(--black); --sel-fg: var(--bone); --line: var(--black); --rule: rgba(0,0,0,.25); }
 .band.orange::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background-image: radial-gradient(rgba(0,0,0,.22) 1.1px, transparent 1.7px); background-size: 7px 7px;
@@ -84,6 +84,18 @@ button { cursor: pointer; }
 .label { margin: 22px 0 10px; font: 800 17px/1.2 var(--font); letter-spacing: -.02em; }
 .label:first-child { margin-top: 0; }
 
+/* Modo */
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mode {
+  display: grid; align-content: space-between; gap: 18px; min-height: 150px; padding: 14px; text-align: left;
+  background: transparent; color: var(--fg); border: 1.5px solid var(--line); border-radius: 6px;
+}
+.mode b { font: 900 30px/.9 var(--font); letter-spacing: -.06em; }
+.mode span { font-size: 14px; color: var(--dim); }
+.mode[aria-pressed="true"] { background: var(--black); color: var(--bone); border-color: var(--black); }
+.mode[aria-pressed="true"] span { color: var(--ash); }
+.mode[aria-pressed="true"] b { color: var(--orange); }
+
 /* Campos */
 textarea, select {
   width: 100%; min-height: 50px; padding: 12px 14px; background: transparent; color: var(--fg);
@@ -103,6 +115,7 @@ select option { color: #000; }
 .btn.solid { background: var(--fg); color: var(--bg); }
 .btn.hot { background: var(--orange); border-color: var(--orange); color: var(--black); }
 .btn.plain { border-color: transparent; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { min-height: 42px; padding: 6px 15px; background: transparent; color: var(--fg); border: 1.5px solid var(--line); border-radius: 999px; font-weight: 500; font-size: 15px; }
@@ -114,40 +127,62 @@ select option { color: #000; }
 .pads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 @media (min-width: 520px) { .pads { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .pad {
-  display: grid; align-content: space-between; gap: 14px; min-height: 92px; padding: 10px 10px 9px; text-align: left;
+  display: grid; align-content: space-between; gap: 14px; min-height: 88px; padding: 10px 10px 9px; text-align: left;
   background: var(--graphite); color: var(--bone); border: 0; border-radius: 6px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -4px 0 rgba(0,0,0,.55);
 }
-.pad b { font: 800 18px/1 var(--font); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.pad b { font: 800 19px/1 var(--font); letter-spacing: -.04em; overflow-wrap: anywhere; }
 .pad small { font-size: 12px; color: var(--ash); font-variant-numeric: tabular-nums; }
-.pad .new { justify-self: start; padding: 2px 7px; border-radius: 999px; background: var(--bone); color: var(--black); font-size: 11px; font-weight: 800; }
 .pad[aria-pressed="true"] { background: var(--orange); color: var(--black); box-shadow: inset 0 3px 0 rgba(0,0,0,.25); }
 .pad[aria-pressed="true"] small { color: #3d1004; }
 .tip { margin: 18px 0 0; padding-left: 14px; border-left: 4px solid var(--orange); font-size: 15px; max-width: 46ch; }
 
 /* Ajustes */
-.field { display: grid; gap: 10px; padding-block: 18px; border-top: 1.5px solid #2c2c2c; }
-.field:first-of-type { border-top: 0; padding-top: 0; }
+.field { display: grid; gap: 10px; padding-block: 18px; border-top: 1.5px solid var(--rule); }
+.field.first { border-top: 0; padding-top: 0; }
 .field-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.field-head label { font: 800 17px/1.2 var(--font); letter-spacing: -.02em; }
-.readout { font: 900 46px/.9 var(--font); letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
-.readout small { font-size: 18px; letter-spacing: -.01em; color: var(--ash); }
+.field-head label, .field-head .lbl { font: 800 17px/1.2 var(--font); letter-spacing: -.02em; }
+.readout { font: 900 46px/.9 var(--font); letter-spacing: -.05em; font-variant-numeric: tabular-nums; text-align: right; }
+.readout small { font-size: 18px; letter-spacing: -.01em; color: var(--dim); }
 .readout.auto { color: var(--orange); }
-.hint { margin: 0; color: var(--ash); font-size: 13px; }
+.band.orange .readout.auto { color: var(--black); }
+.readout.word { font-size: 30px; }
+.hint { margin: 0; color: var(--dim); font-size: 13px; }
 .hint button { margin-left: 6px; padding: 3px 12px; min-height: 30px; border-radius: 999px; border: 1.5px solid var(--orange); background: transparent; color: var(--orange); font-weight: 700; }
 input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 40px; margin: 0; background: transparent; }
-input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: var(--bone); }
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: var(--fg); }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -13px; background: var(--orange); border: 0; border-radius: 3px; }
-input[type="range"]::-moz-range-track { height: 4px; background: var(--bone); }
+input[type="range"]::-moz-range-track { height: 4px; background: var(--fg); }
 input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; background: var(--orange); border: 0; border-radius: 3px; }
+.band.orange input[type="range"]::-webkit-slider-thumb { background: var(--black); }
+.band.orange input[type="range"]::-moz-range-thumb { background: var(--black); }
 input[type="range"].off { opacity: .35; }
+.ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--dim); margin-top: -6px; }
 .stepper { display: grid; grid-template-columns: 50px 1fr 50px; gap: 10px; align-items: center; }
 .stepper .btn { padding: 0; min-height: 50px; font-size: 24px; font-weight: 500; }
 .check { display: flex; gap: 12px; align-items: flex-start; }
 .check input { width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--orange); flex: none; }
-details.peek { padding-top: 18px; border-top: 1.5px solid #2c2c2c; }
+details.peek { padding-top: 18px; border-top: 1.5px solid var(--rule); }
 details.peek summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; cursor: pointer; }
-pre.preview { margin: 6px 0 12px; padding: 12px 14px; max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border: 1.5px dashed #444; font: 400 13px/1.55 var(--font); color: var(--ash); }
+pre.preview { margin: 6px 0 12px; padding: 12px 14px; max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border: 1.5px dashed var(--rule); font: 400 13px/1.55 var(--font); color: var(--dim); }
+
+/* Muestra */
+.file-pick { position: relative; display: grid; gap: 4px; place-items: center; min-height: 130px; padding: 18px; text-align: center; border: 2px dashed var(--black); border-radius: 6px; }
+.file-pick b { font: 900 28px/1 var(--font); letter-spacing: -.05em; }
+.file-pick span { font-size: 14px; color: var(--dim); }
+.file-pick input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.sample-card { display: grid; gap: 14px; }
+.sample-name { font: 900 26px/.95 var(--font); letter-spacing: -.05em; overflow-wrap: anywhere; }
+.sample-meta { margin: 4px 0 0; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* Reproductor */
+.player { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 18px; }
+.pp { display: grid; place-items: center; width: 58px; height: 58px; padding: 0; border-radius: 50%; border: 0; background: var(--fg); color: var(--bg); }
+.pp svg { width: 24px; height: 24px; fill: currentColor; }
+.pp .i-pause { display: none; }
+.pp.playing .i-play { display: none; }
+.pp.playing .i-pause { display: block; }
+.ptimes { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; margin-top: -4px; }
 
 /* Grabación y resultado */
 .disc-wrap { display: grid; place-items: center; }
@@ -159,7 +194,6 @@ pre.preview { margin: 6px 0 12px; padding: 12px 14px; max-height: 240px; overflo
 .bar-track { height: 6px; margin-top: 18px; background: rgba(0,0,0,.2); overflow: hidden; }
 .bar-fill { height: 100%; width: 35%; background: var(--black); animation: slide 1.5s ease-in-out infinite; }
 @keyframes slide { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
-audio { width: 100%; margin-top: 18px; }
 .error { margin: 0; padding-left: 14px; border-left: 4px solid var(--orange); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   .spin canvas { animation: none; }
@@ -241,8 +275,18 @@ dialog .btn { --fg: var(--bone); --line: var(--bone); --bg: var(--black); }
       <div class="disc-wrap" id="resDiscWrap"><canvas id="resDisc" width="520" height="520" aria-hidden="true"></canvas></div>
       <p class="big" id="resTitle">beat</p>
       <p class="meta" id="resMeta"></p>
-      <audio id="player" controls preload="metadata" playsinline></audio>
-      <div class="row" style="margin-top:16px">
+      <audio id="player" preload="metadata" playsinline></audio>
+      <div class="player" id="resPlayer">
+        <button class="pp" type="button" aria-label="Reproducir">
+          <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+          <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>
+        </button>
+        <div>
+          <input type="range" min="0" max="1000" step="1" value="0" aria-label="Posición">
+          <div class="ptimes"><span class="cur">0:00</span><span class="tot">0:00</span></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:18px">
         <button class="btn solid" id="save" type="button">Guardar archivo</button>
         <button class="btn" id="again" type="button">Otra toma</button>
       </div>
@@ -253,14 +297,78 @@ dialog .btn { --fg: var(--bone); --line: var(--bone); --bg: var(--black); }
 
   <section class="band bone">
     <div class="inner">
-      <h2 class="keys" aria-label="Tu idea"></h2>
-      <p class="sub">Cuenta cómo quieres que suene. En inglés funciona mejor, pero puedes escribir en español.</p>
-      <textarea id="idea" rows="3" placeholder="Ej: beat oscuro para un tema de superación, piano triste y drums que peguen duro"></textarea>
-      <div class="row" style="margin-top:14px"><button class="btn solid" id="surprise" type="button">Sorpréndeme</button></div>
+      <h2 class="keys" aria-label="Modo"></h2>
+      <div class="modes">
+        <button type="button" class="mode" id="modeScratch" aria-pressed="true"><b>desde cero</b><span>Describe el beat y la IA lo crea.</span></button>
+        <button type="button" class="mode" id="modeSample" aria-pressed="false"><b>desde una muestra</b><span>Sube un audio y la IA hace un beat nuevo a partir de él.</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="band orange" id="sampleBand" hidden>
+    <div class="inner">
+      <h2 class="keys" aria-label="Muestra"></h2>
+      <p class="sub">Un loop, un sample, una nota de voz tarareando, otro beat. Usa audio tuyo o con permiso.</p>
+
+      <label class="file-pick" id="filePick" for="sampleFile">
+        <b>subir audio</b>
+        <span>MP3, WAV, M4A o AIFF. Desde Archivos o Notas de voz.</span>
+        <input id="sampleFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.aif,.aiff,.flac">
+      </label>
+      <p class="hint" id="sampleStatus" style="margin-top:10px"></p>
+
+      <div class="sample-card" id="sampleCard" hidden>
+        <div>
+          <div class="sample-name" id="sampleName"></div>
+          <p class="sample-meta" id="sampleMeta"></p>
+        </div>
+        <audio id="samplePlayer" preload="auto" playsinline></audio>
+        <div class="player" id="smpPlayer" style="margin-top:0">
+          <button class="pp" type="button" aria-label="Reproducir">
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>
+          </button>
+          <div>
+            <input type="range" min="0" max="1000" step="1" value="0" aria-label="Posición en la muestra">
+            <div class="ptimes"><span class="cur">0:00</span><span class="tot">0:00</span></div>
+          </div>
+        </div>
+
+        <div class="field first" style="padding-top:8px">
+          <div class="field-head"><label for="segStart">Desde dónde</label><span class="readout word" id="segStartOut">0:00</span></div>
+          <input id="segStart" type="range" min="0" max="0" step="0.5" value="0">
+        </div>
+        <div class="field">
+          <div class="field-head"><label for="segLen">Largo del fragmento</label><span class="readout word" id="segLenOut">0:20</span></div>
+          <input id="segLen" type="range" min="2" max="60" step="0.5" value="20">
+          <p class="hint">La IA toma este pedazo y lo repite hasta llegar a la duración del beat.</p>
+        </div>
+
+        <div class="field">
+          <span class="lbl" style="font:800 17px/1.2 var(--font)">¿Qué tomar de tu muestra?</span>
+          <div class="chips" id="refs"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-head"><label for="likeness">Parecido</label><span class="readout word" id="likeOut">Inspirado</span></div>
+          <input id="likeness" type="range" min="10" max="95" step="1" value="50">
+          <div class="ends"><span>Solo la vibra</span><span>Muy fiel</span></div>
+          <p class="hint">Se ajusta solo según lo que elijas arriba. Muévelo si quieres más o menos parecido.</p>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="band">
+    <div class="inner">
+      <h2 class="keys" aria-label="Tu idea"></h2>
+      <p class="sub" id="ideaSub">Cuenta cómo quieres que suene. En inglés funciona mejor, pero puedes escribir en español.</p>
+      <textarea id="idea" rows="3" placeholder="Ej: beat oscuro para un tema de superación, piano triste y drums que peguen duro"></textarea>
+      <div class="row" style="margin-top:14px"><button class="btn" id="surprise" type="button">Sorpréndeme</button></div>
+    </div>
+  </section>
+
+  <section class="band bone">
     <div class="inner">
       <h2 class="keys" aria-label="Estilo"></h2>
       <p class="sub">Toca un pad para ver ideas de sonidos y su tempo típico.</p>
@@ -295,7 +403,7 @@ dialog .btn { --fg: var(--bone); --line: var(--bone); --bg: var(--black); }
     <div class="inner">
       <h2 class="keys" aria-label="Ajustes"></h2>
 
-      <div class="field">
+      <div class="field first">
         <div class="field-head"><label for="dur">Duración</label><span class="readout" id="durOut">3:00</span></div>
         <div class="chips" id="durPresets"></div>
         <div class="stepper">
@@ -317,12 +425,17 @@ dialog .btn { --fg: var(--bone); --line: var(--bone); --bg: var(--black); }
       </div>
 
       <div class="field">
-        <label class="field-head" for="key" style="font-weight:800;font-size:17px">Tonalidad</label>
-        <select id="key"></select>
+        <div class="field-head"><label for="key">Tonalidad</label><span class="readout" id="keyOut">IA</span></div>
+        <div class="chips">
+          <button type="button" class="chip" id="keyAuto" aria-pressed="true">Que la IA la elija</button>
+          <button type="button" class="chip" id="keyManual" aria-pressed="false">Elegirla yo</button>
+        </div>
+        <select id="key" hidden></select>
+        <p class="hint" id="keyHint"></p>
       </div>
 
       <div class="field">
-        <label class="field-head" for="fmt" style="font-weight:800;font-size:17px">Formato de descarga</label>
+        <div class="field-head"><label for="fmt">Formato de descarga</label></div>
         <select id="fmt"></select>
       </div>
 
@@ -380,18 +493,22 @@ dialog .btn { --fg: var(--bone); --line: var(--bone); --bg: var(--black); }
 'use strict';
 
 /* ---------- Datos ---------- */
-const ENDPOINT = 'https://queue.fal.run/fal-ai/stable-audio-3/medium/text-to-audio';
+const ENDPOINT_TEXT = 'https://queue.fal.run/fal-ai/stable-audio-3/medium/text-to-audio';
+const ENDPOINT_AUDIO = 'https://queue.fal.run/fal-ai/stable-audio-3/medium/audio-to-audio';
+const FAL_CLIENT_VERSIONS = ['1', '1.0.0'];
 const NEG = 'vocals, singing, rapping, humming, choir, spoken word, lyrics, muddy mix, clipping, background noise';
 const MAX_LIB = 12;
 const DUR_MIN = 15, DUR_MAX = 380;
 const DUR_PRESETS = [30, 60, 120, 180, 240, 300, 360];
+const SAMPLE_RATE_OUT = 32000;
+const MAX_FILE_MB = 80;
 
 const GENRES = [
   { id: 'boombap', name: 'Boom Bap', bpm: 90, range: [82, 98],
     base: 'classic 1990s boom bap hip hop instrumental with hard-hitting dusty drums, swung 16th-note groove, chopped soul and jazz sample loops, deep warm bass',
     tip: 'Un loop de 4 u 8 compases que se repita y deje respirar la caja. Ideal para barras largas.',
     tags: [['Rhodes jazzero','jazzy Rhodes electric piano chords'],['Loop de soul chopeado','chopped vintage soul sample loop'],['Vinilo y crackle','vinyl crackle and tape warmth'],['Scratches','DJ scratches and cuts in the hook sections'],['Contrabajo','upright bass line'],['Cuerdas de película','cinematic string stabs'],['Trompeta con sordina','muted trumpet melody'],['Caja seca','crisp snare with short room reverb']] },
-  { id: 'drumless', name: 'Drumless', isNew: true, bpm: 84, range: [68, 96],
+  { id: 'drumless', name: 'Drumless', bpm: 84, range: [68, 96],
     base: 'drumless underground hip hop instrumental: a single hypnotic looped sample with absolutely no drums, no kick, no snare, no hi-hats and no percussion; dusty chopped soul, jazz or obscure 1970s library music sample, cinematic and eerie, warbling detuned textures, lots of vinyl hiss and tape saturation, little or no bass, raw and gritty, built for a rapper to ride the loop',
     arrange: 'one looping sample that evolves slowly with subtle filter sweeps, drop-outs and short breakdowns, drums never enter at any point',
     mix: 'warm dusty lo-fi mix, raw, analog, unpolished',
@@ -476,6 +593,18 @@ const MOODS = [
   ['relajado','laid-back and smooth'],['sucio','gritty and raw'],['romántico','romantic and sensual'],['festivo','party energy, bouncy']
 ];
 
+/* Qué tomar de la muestra. w = cuánto sube el parecido. */
+const REFS = [
+  { id: 'melodia',  label: 'Melodía',            w: 28, phrase: 'keep the main melody of the reference audio' },
+  { id: 'acordes',  label: 'Acordes y armonía',  w: 22, phrase: 'keep the chord progression and harmony of the reference audio' },
+  { id: 'ritmo',    label: 'Ritmo y groove',     w: 22, phrase: 'keep the rhythm, swing and groove of the reference audio' },
+  { id: 'bajo',     label: 'Línea de bajo',      w: 14, phrase: 'keep the bass line of the reference audio' },
+  { id: 'instr',    label: 'Instrumentos',       w: 16, phrase: 'keep the same instruments and timbres as the reference audio' },
+  { id: 'textura',  label: 'Textura y ambiente', w: 10, phrase: 'keep the texture, atmosphere and sonic color of the reference audio' },
+  { id: 'tempo',    label: 'Tempo',              w: 6,  phrase: 'same tempo as the reference audio' },
+  { id: 'chop',     label: 'Chopearla',          w: -10, phrase: 'chop and rearrange the reference into a new sample flip' }
+];
+
 const VARIATIONS = [
   { id: 'dark',   label: 'Más oscuro',      phrase: 'darker, more menacing mood' },
   { id: 'slow',   label: 'Más lento',       bpm: -8 },
@@ -494,15 +623,14 @@ const FORMATS = {
   m4a:  { label: 'M4A (AAC) a 256 kbps',                  ext: 'm4a',  mime: 'audio/mp4',  bitrate: '256k' }
 };
 
-const KEYS = ['Auto'].concat(
-  ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'].map(k => k + ' minor'),
-  ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'].map(k => k + ' major')
-);
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const KEYS = NOTES.map(k => k + ' minor').concat(NOTES.map(k => k + ' major'));
+const keyLabel = k => k.replace(' minor', 'm').replace(' major', '');
 
 /* ---------- Utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-const mmss = s => Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0');
+const mmss = s => { s = Math.max(0, s || 0); return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'); };
 const mb = n => (n / 1048576).toFixed(1) + ' MB';
 const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
 const rand = a => a[Math.floor(Math.random() * a.length)];
@@ -519,20 +647,29 @@ const sleep = (ms, signal) => new Promise((res, rej) => {
 
 /* ---------- Estado ---------- */
 const S = {
+  mode: 'scratch',
   text: '', genre: null, region: null, tags: new Set(), moods: new Set(), tweaks: new Set(),
-  bpm: 90, bpmAuto: store.get('bpmAuto', true), key: 'Auto', dur: store.get('dur', 180), fmt: store.get('fmt', 'wav'),
-  room: store.get('room', true)
+  bpm: 90, bpmAuto: store.get('bpmAuto', true),
+  key: store.get('key', 'A minor'), keyAuto: store.get('keyAuto', true),
+  dur: store.get('dur', 180), fmt: store.get('fmt', 'wav'), room: store.get('room', true),
+  sample: null, refs: new Set(['textura']), likeness: 40, likeTouched: false
 };
 if (!FORMATS[S.fmt]) S.fmt = 'wav';
+if (!KEYS.includes(S.key)) S.key = 'A minor';
 S.dur = clamp(Math.round((Number(S.dur) || 180) / 5) * 5, DUR_MIN, DUR_MAX);
 let busy = false, aborter = null, cancelUrl = null, current = null, currentObjUrl = null, timer = null, view = 'create';
 
 const genreOf = () => GENRES.find(g => g.id === S.genre) || null;
-const setManualBpm = n => { S.bpm = clamp(n, 60, 200); S.bpmAuto = false; store.set('bpmAuto', false); };
+const setManualBpm = n => { S.bpm = clamp(Math.round(n), 60, 200); S.bpmAuto = false; store.set('bpmAuto', false); };
+const sampleMode = () => S.mode === 'sample';
+const suggestedLikeness = () => clamp(22 + [...S.refs].reduce((t, id) => t + (REFS.find(r => r.id === id) || { w: 0 }).w, 0), 15, 90);
+const noiseLevel = () => +(0.97 - S.likeness / 100 * 0.55).toFixed(2);
+const likeWord = v => v < 30 ? 'Solo la vibra' : v < 55 ? 'Inspirado' : v < 75 ? 'Cercano' : 'Muy fiel';
 
 /* ---------- Pedido a la IA ---------- */
 function composePrompt() {
   const g = genreOf(), parts = [];
+  if (sampleMode()) parts.push('a new hip hop instrumental beat built from the reference audio');
   if (S.text.trim()) parts.push(S.text.trim());
   if (g) parts.push(g.base);
   const r = REGIONS.find(x => x[0] === S.region);
@@ -540,8 +677,10 @@ function composePrompt() {
   if (g) g.tags.forEach(([, p], i) => { if (S.tags.has(i)) parts.push(p); });
   MOODS.forEach(([id, p]) => { if (S.moods.has(id)) parts.push(p); });
   VARIATIONS.forEach(v => { if (v.phrase && S.tweaks.has(v.id)) parts.push(v.phrase); });
+  if (sampleMode()) REFS.forEach(ref => { if (S.refs.has(ref.id)) parts.push(ref.phrase); });
   if (!S.bpmAuto) parts.push(S.bpm + ' BPM');
-  if (S.key !== 'Auto') parts.push('in the key of ' + S.key);
+  else if (sampleMode() && S.refs.has('tempo') && S.sample && S.sample.bpm) parts.push('around ' + S.sample.bpm + ' BPM');
+  if (!S.keyAuto) parts.push('in the key of ' + S.key);
   if (S.room) parts.push("leaves room for a rapper's vocals: sparse mid-range and no lead melody competing with the voice");
   if (S.dur < 45) parts.push('short tight beat loop, immediate groove, no long intro, clean ending');
   else if (g && g.arrange) parts.push(g.arrange);
@@ -555,9 +694,10 @@ function negativePrompt() {
   return g && g.neg ? NEG + ', ' + g.neg : NEG;
 }
 function beatTitle() {
-  const g = genreOf(), bits = [g ? g.name : 'Beat libre'];
+  const g = genreOf(), bits = [g ? g.name : (sampleMode() ? 'Desde muestra' : 'Beat libre')];
+  if (sampleMode() && g) bits[0] += ' desde muestra';
   if (!S.bpmAuto) bits.push(S.bpm + ' BPM');
-  if (S.key !== 'Auto') bits.push(S.key);
+  if (!S.keyAuto) bits.push(keyLabel(S.key));
   return bits.join(', ');
 }
 
@@ -589,6 +729,144 @@ function drawDisc(canvas, ink) {
   }
 }
 
+/* ---------- Reproductor propio ---------- */
+function makePlayer(audio, root, onState) {
+  const btn = root.querySelector('.pp'), seek = root.querySelector('input[type=range]');
+  const cur = root.querySelector('.cur'), tot = root.querySelector('.tot');
+  let dragging = false;
+  const render = () => {
+    const playing = !audio.paused && !audio.ended;
+    btn.classList.toggle('playing', playing);
+    btn.setAttribute('aria-label', playing ? 'Pausar' : 'Reproducir');
+    const d = isFinite(audio.duration) ? audio.duration : 0;
+    tot.textContent = mmss(d);
+    if (!dragging) {
+      cur.textContent = mmss(audio.currentTime);
+      seek.value = d ? Math.round(audio.currentTime / d * 1000) : 0;
+    }
+    onState && onState(playing);
+  };
+  ['play','playing','pause','ended','emptied','loadedmetadata','durationchange','timeupdate','seeked','abort','error'].forEach(ev => audio.addEventListener(ev, render));
+  btn.addEventListener('click', async () => {
+    if (audio.paused || audio.ended) {
+      try { if (audio.ended) audio.currentTime = 0; await audio.play(); } catch {}
+    } else audio.pause();
+    render();
+  });
+  seek.addEventListener('input', () => {
+    dragging = true;
+    const d = isFinite(audio.duration) ? audio.duration : 0;
+    cur.textContent = mmss(seek.value / 1000 * d);
+  });
+  seek.addEventListener('change', () => {
+    const d = isFinite(audio.duration) ? audio.duration : 0;
+    if (d) audio.currentTime = seek.value / 1000 * d;
+    dragging = false; render();
+  });
+  return {
+    load(src) { audio.pause(); audio.removeAttribute('src'); audio.load(); if (src) { audio.src = src; audio.load(); } render(); },
+    stop() { audio.pause(); render(); },
+    render
+  };
+}
+
+/* ---------- Muestra: decodificar, BPM, preparar ---------- */
+let audioCtx = null;
+function getCtx() {
+  if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; audioCtx = new AC(); }
+  return audioCtx;
+}
+function decode(buf) {
+  const ctx = getCtx();
+  return new Promise((res, rej) => {
+    const p = ctx.decodeAudioData(buf, res, rej);
+    if (p && p.then) p.then(res, rej);
+  });
+}
+function estimateBpm(buffer, start, len) {
+  try {
+    const sr = buffer.sampleRate, ch = buffer.getChannelData(0);
+    const s0 = Math.floor(start * sr), s1 = Math.min(ch.length, Math.floor((start + Math.min(len, 30)) * sr));
+    const hop = 512, env = [];
+    let prev = 0;
+    for (let i = s0; i + hop < s1; i += hop) {
+      let e = 0;
+      for (let j = 0; j < hop; j++) { const v = ch[i + j]; e += v * v; }
+      e = Math.sqrt(e / hop);
+      env.push(Math.max(0, e - prev)); prev = e;
+    }
+    if (env.length < 64) return null;
+    const fps = sr / hop;
+    let best = 0, bestBpm = null;
+    for (let bpm = 60; bpm <= 180; bpm += 0.5) {
+      const lag = fps * 60 / bpm, L = Math.floor(lag), f = lag - L;
+      let sum = 0;
+      for (let i = 0; i + L + 1 < env.length; i++) sum += env[i] * (env[i + L] * (1 - f) + env[i + L + 1] * f);
+      const prior = Math.exp(-Math.pow(Math.log2(bpm / 95), 2) * 1.5);
+      const score = sum * prior;
+      if (score > best) { best = score; bestBpm = bpm; }
+    }
+    return bestBpm ? Math.round(bestBpm) : null;
+  } catch { return null; }
+}
+async function renderSegment(buffer, start, len, total, rate) {
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const frames = Math.ceil(total * rate);
+  let off;
+  try { off = new OAC(1, frames, rate); } catch { off = new OAC(1, Math.ceil(total * 44100), 44100); }
+  const src = off.createBufferSource();
+  src.buffer = buffer;
+  src.loop = true;
+  src.loopStart = start;
+  src.loopEnd = Math.min(buffer.duration, start + len);
+  src.connect(off.destination);
+  src.start(0, start);
+  const out = await new Promise((res, rej) => {
+    off.oncomplete = e => res(e.renderedBuffer);
+    const p = off.startRendering();
+    if (p && p.then) p.then(res, rej);
+  });
+  return out;
+}
+function encodeWav(ab) {
+  const data = ab.getChannelData(0), sr = ab.sampleRate, n = data.length;
+  let peak = 0;
+  for (let i = 0; i < n; i++) { const v = Math.abs(data[i]); if (v > peak) peak = v; }
+  const gain = peak > 0.98 ? 0.98 / peak : 1;
+  const buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0, o = 44; i < n; i++, o += 2) v.setInt16(o, clamp(data[i] * gain, -1, 1) * 0x7FFF, true);
+  return new Blob([buf], { type: 'audio/wav' });
+}
+function blobToDataUri(blob) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); });
+}
+let falClient = null;
+async function loadFal() {
+  if (falClient) return falClient;
+  for (const v of FAL_CLIENT_VERSIONS) {
+    try { const m = await import(`https://cdn.jsdelivr.net/npm/@fal-ai/client@${v}/+esm`); if (m && m.fal) { falClient = m.fal; return falClient; } } catch {}
+  }
+  return null;
+}
+async function uploadSample(blob, key) {
+  const fal = await loadFal();
+  if (fal) {
+    try {
+      fal.config({ credentials: key });
+      const file = new File([blob], 'cabina-muestra.wav', { type: 'audio/wav' });
+      const url = await fal.storage.upload(file);
+      if (url) return url;
+    } catch (e) { console.warn('fal upload', e); }
+  }
+  if (blob.size < 6 * 1048576) return blobToDataUri(blob);
+  throw new AppError('No pude subir tu muestra a fal.ai. Prueba con un beat más corto o un fragmento más corto.');
+}
+
 /* ---------- Render ---------- */
 const chip = (kind, id, label, extra = '') =>
   `<button type="button" class="chip ${extra}" data-kind="${kind}" data-id="${esc(id)}" aria-pressed="false">${esc(label)}</button>`;
@@ -602,12 +880,13 @@ function buildKeys() {
 function buildStatic() {
   buildKeys();
   $('#genres').innerHTML = GENRES.map(g =>
-    `<button type="button" class="pad" data-kind="genre" data-id="${g.id}" aria-pressed="false">${g.isNew ? '<span class="new">Nuevo</span>' : ''}<b>${esc(g.name)}</b><small>${g.range[0]}–${g.range[1]} bpm</small></button>`).join('');
+    `<button type="button" class="pad" data-kind="genre" data-id="${g.id}" aria-pressed="false"><b>${esc(g.name)}</b><small>${g.range[0]}–${g.range[1]} bpm</small></button>`).join('');
   $('#regions').innerHTML = REGIONS.map(r => chip('region', r[0], r[1])).join('');
   $('#moods').innerHTML = MOODS.map(m => chip('mood', m[0], m[0][0].toUpperCase() + m[0].slice(1))).join('');
+  $('#refs').innerHTML = REFS.map(r => chip('ref', r.id, r.label)).join('');
   $('#variations').innerHTML = VARIATIONS.map(v => `<button type="button" class="chip" data-kind="variation" data-id="${v.id}">${esc(v.label)}</button>`).join('');
   $('#durPresets').innerHTML = DUR_PRESETS.map(d => chip('dur', String(d), mmss(d))).join('');
-  $('#key').innerHTML = KEYS.map(k => `<option value="${k}">${k === 'Auto' ? 'Que la IA la elija' : k}</option>`).join('');
+  $('#key').innerHTML = KEYS.map(k => `<option value="${k}">${k.replace(' minor', ' menor').replace(' major', ' mayor')}</option>`).join('');
   $('#fmt').innerHTML = Object.entries(FORMATS).map(([k, f]) => `<option value="${k}">${esc(f.label)}</option>`).join('');
 }
 function renderTags() {
@@ -622,6 +901,20 @@ function renderTweaks() {
   $('#tweaksBox').hidden = on.length === 0;
   $('#tweaks').innerHTML = on.map(v => `<button type="button" class="chip x" data-kind="untweak" data-id="${v.id}" aria-pressed="true">${esc(v.label)}</button>`).join('');
 }
+function renderSample() {
+  const sm = S.sample;
+  $('#sampleCard').hidden = !sm;
+  $('#filePick').querySelector('b').textContent = sm ? 'cambiar audio' : 'subir audio';
+  if (!sm) return;
+  $('#sampleName').textContent = sm.name;
+  $('#sampleMeta').textContent = `${mmss(sm.duration)}${sm.bpm ? ', unos ' + sm.bpm + ' BPM (aprox.)' : ''}`;
+  const maxLen = Math.min(60, sm.duration);
+  const seg = $('#segLen'), st = $('#segStart');
+  seg.min = Math.min(2, maxLen); seg.max = maxLen; seg.value = sm.len;
+  st.max = Math.max(0, sm.duration - sm.len); st.value = sm.start;
+  $('#segStartOut').textContent = mmss(sm.start);
+  $('#segLenOut').textContent = mmss(sm.len);
+}
 function sync() {
   document.querySelectorAll('[data-kind][aria-pressed]').forEach(el => {
     const { kind, id } = el.dataset;
@@ -632,11 +925,24 @@ function sync() {
     else if (kind === 'mood') on = S.moods.has(id);
     else if (kind === 'tag') on = S.tags.has(Number(id));
     else if (kind === 'dur') on = S.dur === Number(id);
+    else if (kind === 'ref') on = S.refs.has(id);
     el.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
   const g = genreOf();
   $('#tip').hidden = !g; $('#tip').textContent = g ? g.tip : '';
 
+  // Modo
+  $('#modeScratch').setAttribute('aria-pressed', !sampleMode());
+  $('#modeSample').setAttribute('aria-pressed', sampleMode());
+  $('#sampleBand').hidden = !sampleMode();
+  $('#ideaSub').textContent = sampleMode()
+    ? 'Opcional. Di qué quieres que la IA haga con tu muestra. En inglés funciona mejor.'
+    : 'Cuenta cómo quieres que suene. En inglés funciona mejor, pero puedes escribir en español.';
+  if (!S.likeTouched) S.likeness = suggestedLikeness();
+  $('#likeness').value = S.likeness;
+  $('#likeOut').textContent = likeWord(S.likeness);
+
+  // Tempo
   $('#bpmAuto').setAttribute('aria-pressed', S.bpmAuto);
   $('#bpmManual').setAttribute('aria-pressed', !S.bpmAuto);
   $('#bpm').value = S.bpm;
@@ -646,18 +952,32 @@ function sync() {
   out.innerHTML = S.bpmAuto ? 'IA' : S.bpm + ' <small>bpm</small>';
   const hint = $('#bpmHint');
   if (S.bpmAuto) {
-    hint.textContent = g ? `La IA elige el tempo. ${g.name} suele ir entre ${g.range[0]} y ${g.range[1]} BPM. Mueve la barra para fijarlo tú.` : 'La IA elige el tempo. Mueve la barra si quieres fijarlo tú.';
+    const smp = sampleMode() && S.sample && S.sample.bpm ? ` Tu muestra va a unos ${S.sample.bpm} BPM.` : '';
+    hint.textContent = (g ? `La IA elige el tempo. ${g.name} suele ir entre ${g.range[0]} y ${g.range[1]} BPM.` : 'La IA elige el tempo.') + smp + ' Mueve la barra para fijarlo tú.';
   } else if (g && (S.bpm < g.range[0] || S.bpm > g.range[1])) {
     hint.innerHTML = `${esc(g.name)} suele sonar entre ${g.range[0]} y ${g.range[1]} BPM. <button type="button" data-kind="bpmfix">Usar ${g.bpm}</button>`;
   } else {
     hint.textContent = g && g.bpm >= 120 ? 'A ' + Math.round(S.bpm / 2) + ' BPM se siente en medio tiempo, para rapear más pausado.' : '';
   }
 
+  // Tonalidad
+  $('#keyAuto').setAttribute('aria-pressed', S.keyAuto);
+  $('#keyManual').setAttribute('aria-pressed', !S.keyAuto);
+  $('#key').hidden = S.keyAuto;
   $('#key').value = S.key;
+  const ko = $('#keyOut');
+  ko.classList.toggle('auto', S.keyAuto);
+  ko.textContent = S.keyAuto ? 'IA' : keyLabel(S.key);
+  $('#keyHint').textContent = S.keyAuto
+    ? (sampleMode() ? 'La IA usa la tonalidad que mejor encaje con tu muestra y el estilo.' : 'La IA elige la tonalidad que mejor encaje con el estilo y el ambiente.')
+    : 'Las menores suenan más oscuras, las mayores más luminosas.';
+
   $('#dur').value = S.dur; $('#durOut').textContent = mmss(S.dur);
   $('#fmt').value = S.fmt;
   $('#room').checked = S.room;
-  $('#preview').textContent = composePrompt() + '\n\nEvitar: ' + negativePrompt();
+  let pv = composePrompt() + '\n\nEvitar: ' + negativePrompt();
+  if (sampleMode()) pv += `\n\nMuestra: ${S.sample ? S.sample.name + ', fragmento de ' + mmss(S.sample.len) + ' desde ' + mmss(S.sample.start) : 'sin subir'}. Parecido: ${S.likeness}% (ruido ${noiseLevel()}).`;
+  $('#preview').textContent = pv;
   $('#go').textContent = busy ? 'Generando…' : 'Generar beat';
   $('#go').disabled = busy;
   renderTweaks();
@@ -669,7 +989,7 @@ function setView(v) {
   $('#bar').hidden = v !== 'create';
   $('#tabCreate').setAttribute('aria-selected', v === 'create');
   $('#tabLib').setAttribute('aria-selected', v === 'library');
-  if (v === 'library') renderLibrary();
+  if (v === 'library') { resPlayer.stop(); smpPlayer.stop(); renderLibrary(); }
 }
 
 /* ---------- Biblioteca (IndexedDB) ---------- */
@@ -729,15 +1049,18 @@ async function renderLibrary() {
 }
 
 /* ---------- Resultado y descarga ---------- */
+const resPlayer = makePlayer($('#player'), $('#resPlayer'), playing => $('#resDiscWrap').classList.toggle('spin', playing));
+const smpPlayer = makePlayer($('#samplePlayer'), $('#smpPlayer'));
+
 function showItem(it, scroll = true) {
   current = it;
   if (currentObjUrl) { URL.revokeObjectURL(currentObjUrl); currentObjUrl = null; }
   let src = it.url || '';
   if (it.blob) { currentObjUrl = URL.createObjectURL(it.blob); src = currentObjUrl; }
-  $('#player').src = src;
+  smpPlayer.stop();
+  resPlayer.load(src);
   $('#resTitle').textContent = it.title.toLowerCase();
   $('#resMeta').textContent = `${mmss(it.dur)}, ${it.ext.toUpperCase()}${it.bytes ? ', ' + mb(it.bytes) : ''}`;
-  $('#resDiscWrap').classList.remove('spin');
   $('#result').hidden = false;
   if (view !== 'create') setView('create');
   if (scroll) $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -777,6 +1100,7 @@ async function api(url, opts, key) {
     try { const j = await r.json(); detail = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail || j); } catch {}
     if (r.status === 401 || r.status === 403) throw new AppError('fal.ai no aceptó la clave o la cuenta no tiene saldo. Revisa la clave y tu saldo en fal.ai.');
     if (r.status === 429) throw new AppError('Demasiados pedidos seguidos. Espera un minuto e inténtalo otra vez.');
+    if (r.status === 413) throw new AppError('La muestra es muy pesada para enviarla. Usa un fragmento más corto o un beat más corto.');
     throw new AppError(`fal.ai respondió ${r.status}. ${detail}`.trim());
   }
   return r.json();
@@ -801,8 +1125,10 @@ async function generate() {
   if (busy) return;
   const key = store.get('fal_key', '');
   if (!key) { openKey(); return; }
+  if (sampleMode() && !S.sample) { showError('Sube primero tu muestra de audio, o cambia a "desde cero".'); $('#sampleBand').scrollIntoView({ behavior: 'smooth' }); return; }
   busy = true; aborter = new AbortController(); cancelUrl = null;
   if (view !== 'create') setView('create');
+  resPlayer.stop(); smpPlayer.stop();
   showError(''); setStage(true); sync();
   const fmt = FORMATS[S.fmt];
   const seed = Math.floor(Math.random() * 2147483647);
@@ -811,8 +1137,20 @@ async function generate() {
   if (fmt.bitrate) body.bitrate = fmt.bitrate;
   const started = Date.now();
   try {
+    let endpoint = ENDPOINT_TEXT;
+    if (sampleMode()) {
+      endpoint = ENDPOINT_AUDIO;
+      $('#statusText').textContent = 'Preparando tu muestra';
+      const sm = S.sample;
+      const rendered = await renderSegment(sm.buffer, sm.start, sm.len, S.dur, SAMPLE_RATE_OUT);
+      const wav = encodeWav(rendered);
+      if (aborter.signal.aborted) throw new DOMException('Cancelado', 'AbortError');
+      $('#statusText').textContent = 'Subiendo tu muestra';
+      body.audio_url = await uploadSample(wav, key);
+      body.init_noise_level = noiseLevel();
+    }
     $('#statusText').textContent = 'Enviando';
-    const sub = await api(ENDPOINT, { method: 'POST', body: JSON.stringify(body) }, key);
+    const sub = await api(endpoint, { method: 'POST', body: JSON.stringify(body) }, key);
     cancelUrl = sub.cancel_url || null;
     for (;;) {
       await sleep(2500, aborter.signal);
@@ -849,6 +1187,29 @@ async function generate() {
   }
 }
 
+/* ---------- Cargar muestra ---------- */
+let sampleUrl = null;
+async function loadSampleFile(file) {
+  const status = $('#sampleStatus');
+  if (!file) return;
+  if (file.size > MAX_FILE_MB * 1048576) { status.textContent = `El archivo pesa más de ${MAX_FILE_MB} MB. Recórtalo o usa un MP3.`; return; }
+  status.textContent = 'Leyendo tu audio…';
+  try {
+    const buffer = await decode(await file.arrayBuffer());
+    if (!buffer || buffer.duration < 1) throw new Error('corto');
+    const len = Math.min(20, buffer.duration);
+    const name = file.name.replace(/\.[^.]+$/, '') || 'Muestra';
+    S.sample = { name, buffer, duration: buffer.duration, start: 0, len, bpm: estimateBpm(buffer, 0, Math.min(30, buffer.duration)) };
+    if (sampleUrl) URL.revokeObjectURL(sampleUrl);
+    sampleUrl = URL.createObjectURL(file);
+    smpPlayer.load(sampleUrl);
+    status.textContent = '';
+    renderSample(); sync();
+  } catch {
+    status.textContent = 'No pude leer ese audio. Prueba con un MP3, WAV o M4A.';
+  }
+}
+
 /* ---------- Clave ---------- */
 const dlg = $('#keyDlg');
 function openKey() { $('#keyInput').value = ''; $('#keyInput').placeholder = store.get('fal_key', '') ? 'Ya hay una clave guardada' : 'Pega tu clave'; dlg.showModal(); }
@@ -865,13 +1226,14 @@ document.addEventListener('click', e => {
   } else if (kind === 'region') S.region = S.region === id ? null : id;
   else if (kind === 'mood') S.moods.has(id) ? S.moods.delete(id) : S.moods.add(id);
   else if (kind === 'tag') { const n = Number(id); S.tags.has(n) ? S.tags.delete(n) : S.tags.add(n); }
+  else if (kind === 'ref') { S.refs.has(id) ? S.refs.delete(id) : S.refs.add(id); S.likeTouched = false; }
   else if (kind === 'untweak') S.tweaks.delete(id);
   else if (kind === 'bpmfix') setManualBpm(genreOf().bpm);
   else if (kind === 'dur') { S.dur = Number(id); store.set('dur', S.dur); }
   else if (kind === 'durstep') { S.dur = clamp(S.dur + Number(id), DUR_MIN, DUR_MAX); store.set('dur', S.dur); }
   else if (kind === 'variation') {
     const v = VARIATIONS.find(x => x.id === id);
-    if (v.bpm) setManualBpm((S.bpmAuto ? ((genreOf() || {}).bpm || 90) : S.bpm) + v.bpm);
+    if (v.bpm) setManualBpm((S.bpmAuto ? ((sampleMode() && S.sample && S.sample.bpm) || (genreOf() || {}).bpm || 90) : S.bpm) + v.bpm);
     else S.tweaks.add(v.id);
     sync(); generate(); return;
   }
@@ -883,11 +1245,31 @@ document.addEventListener('click', e => {
 
 $('#tabCreate').addEventListener('click', () => setView('create'));
 $('#tabLib').addEventListener('click', () => setView('library'));
+$('#modeScratch').addEventListener('click', () => { S.mode = 'scratch'; smpPlayer.stop(); sync(); });
+$('#modeSample').addEventListener('click', () => { S.mode = 'sample'; sync(); $('#sampleBand').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+$('#sampleFile').addEventListener('change', e => { loadSampleFile(e.target.files && e.target.files[0]); e.target.value = ''; });
+$('#segStart').addEventListener('input', e => {
+  if (!S.sample) return;
+  S.sample.start = clamp(Number(e.target.value), 0, Math.max(0, S.sample.duration - S.sample.len));
+  $('#segStartOut').textContent = mmss(S.sample.start);
+  const a = $('#samplePlayer'); if (isFinite(a.duration)) a.currentTime = S.sample.start;
+  sync();
+});
+$('#segStart').addEventListener('change', () => { if (S.sample) { S.sample.bpm = estimateBpm(S.sample.buffer, S.sample.start, S.sample.len) || S.sample.bpm; renderSample(); sync(); } });
+$('#segLen').addEventListener('input', e => {
+  if (!S.sample) return;
+  S.sample.len = Number(e.target.value);
+  S.sample.start = clamp(S.sample.start, 0, Math.max(0, S.sample.duration - S.sample.len));
+  renderSample(); sync();
+});
+$('#likeness').addEventListener('input', e => { S.likeness = Number(e.target.value); S.likeTouched = true; sync(); });
 $('#idea').addEventListener('input', e => { S.text = e.target.value; sync(); });
 $('#bpmAuto').addEventListener('click', () => { S.bpmAuto = true; store.set('bpmAuto', true); sync(); });
 $('#bpmManual').addEventListener('click', () => { setManualBpm(S.bpm); sync(); });
 $('#bpm').addEventListener('input', e => { setManualBpm(Number(e.target.value)); sync(); });
-$('#key').addEventListener('change', e => { S.key = e.target.value; sync(); });
+$('#keyAuto').addEventListener('click', () => { S.keyAuto = true; store.set('keyAuto', true); sync(); });
+$('#keyManual').addEventListener('click', () => { S.keyAuto = false; store.set('keyAuto', false); sync(); });
+$('#key').addEventListener('change', e => { S.key = e.target.value; store.set('key', S.key); sync(); });
 $('#dur').addEventListener('input', e => { S.dur = Number(e.target.value); store.set('dur', S.dur); sync(); });
 $('#fmt').addEventListener('change', e => { S.fmt = e.target.value; store.set('fmt', S.fmt); sync(); });
 $('#room').addEventListener('change', e => { S.room = e.target.checked; store.set('room', S.room); sync(); });
@@ -906,7 +1288,6 @@ $('#surprise').addEventListener('click', () => {
   S.tags.clear(); S.moods.clear(); S.tweaks.clear();
   g.tags.map((_, i) => i).sort(() => Math.random() - .5).slice(0, 2).forEach(i => S.tags.add(i));
   S.moods.add(rand(MOODS)[0]);
-  S.key = rand(KEYS.slice(1, 13));
   renderTags(); sync();
 });
 $('#copy').addEventListener('click', async e => {
@@ -919,9 +1300,9 @@ $('#keyBtn').addEventListener('click', openKey);
 $('#keyClose').addEventListener('click', () => dlg.close());
 $('#keyForget').addEventListener('click', () => { store.del('fal_key'); dlg.close(); });
 $('#keyForm').addEventListener('submit', () => { const v = $('#keyInput').value.trim(); if (v) store.set('fal_key', v); });
-$('#player').addEventListener('play', () => $('#resDiscWrap').classList.add('spin'));
-$('#player').addEventListener('pause', () => $('#resDiscWrap').classList.remove('spin'));
-$('#player').addEventListener('ended', () => $('#resDiscWrap').classList.remove('spin'));
+/* Solo un audio a la vez */
+$('#player').addEventListener('play', () => smpPlayer.stop());
+$('#samplePlayer').addEventListener('play', () => resPlayer.stop());
 
 /* ---------- Discos e icono ---------- */
 try {
@@ -937,7 +1318,7 @@ try {
 } catch {}
 
 /* ---------- Inicio ---------- */
-buildStatic(); renderTags(); sync(); renderLibrary();
+buildStatic(); renderTags(); renderSample(); sync(); renderLibrary();
 if (!store.get('fal_key', '')) setTimeout(() => { try { openKey(); } catch {} }, 600);
 })();
 </script>
